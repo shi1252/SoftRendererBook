@@ -7,6 +7,6 @@
 #endif
 
 #if !defined(FORCEINLINE)
-	#define FORCEINLINE
+	#define FORCEINLINE inline
 #endif
 

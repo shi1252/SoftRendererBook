@@ -52,8 +52,10 @@ private:
 	void DrawGrid2D();
 
 	int _Grid2DUnit = 10;
-	Vector2 _CurrentPosition = Vector2::Zero;
+	Vector2 _CurrentPosition = Vector2::One * 10.f;
 	LinearColor _CurrentColor = LinearColor::Blue;
+	Matrix2x2 _DeltaTransform;
+	Transform _Transform;
 
 private:
 	// 초기화 점검 변수

@@ -34,13 +34,33 @@ void SoftRenderer::DrawGrid2D()
 	_RSI->DrawFullVerticalLine(screenHalfSize._X, LinearColor::Green);
 }
 
-
 // 게임 로직
 void SoftRenderer::Update2D(float InDeltaSeconds)
 {
-	// 점의 위치와 색상 지정하기
-	_CurrentPosition = Vector2(10.f, 10.f);
-	_CurrentColor = LinearColor::Blue;
+	static float time = 0.f;
+
+	time += InDeltaSeconds;
+	if (time >= 4.f) time -= 4.f;
+
+	float y = 0.f;
+	if (time <= 2.f)
+	{
+		y = sinf(time * Math::PI);
+		_Transform.SetPosition(Vector2(time, y * 0.5f));
+	}
+	else
+	{
+		float x = 4 - time;
+		y = -sinf(x * Math::PI);
+		_Transform.SetPosition(Vector2(x, y * 0.5f));
+	}
+
+	float div = time / 4.f;
+	Vector3 r(1.f, 0.f, 0.f), g(0.f, 1.f, 0.f), b(0.f, 0.f, 1.f);
+	Vector3 color = (r * powf((1.f - div), 2.f) + g * 2.f * div * (1.f - div) + b * powf(div, 2.f));
+	_CurrentColor._R = color._X;
+	_CurrentColor._G = color._Y;
+	_CurrentColor._B = color._Z;
 }
 
 // 렌더링 로직
@@ -49,7 +69,19 @@ void SoftRenderer::Render2D()
 	// 격자 그리기
 	DrawGrid2D();
 
-	// 지정된 위치에 지정한 색상으로 점 찍기
-	_RSI->DrawPoint(_CurrentPosition, _CurrentColor);
-}
+	Vector3 curPos(0.f, 0.f, 1.f);
 
+	for (int i = 0; i < 12; ++i)
+	{
+		float cos = cosf(Math::Deg2Rad(i * 30.f));
+		float sin = sinf(Math::Deg2Rad(i * 30.f));
+		Vector3 newPos = (_Transform.GetModelingMatrix() * curPos) * 100.f;
+		Matrix3x3 rotMat(Vector3(cos, sin, 0.f), Vector3(-sin, cos, 0.f), Vector3(0.f, 0.f, 1.f));
+		newPos = rotMat * newPos;
+		_RSI->DrawPoint(newPos.ToVector2(), _CurrentColor);
+		_RSI->DrawPoint((newPos + Vector3::UnitX).ToVector2(), _CurrentColor);
+		_RSI->DrawPoint((newPos - Vector3::UnitX).ToVector2(), _CurrentColor);
+		_RSI->DrawPoint((newPos + Vector3::UnitY).ToVector2(), _CurrentColor);
+		_RSI->DrawPoint((newPos - Vector3::UnitY).ToVector2(), _CurrentColor);
+	}
+}

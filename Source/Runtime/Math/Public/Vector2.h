@@ -14,10 +14,15 @@ public:
 	// 연산자 
 	FORCEINLINE float operator[](int InIndex) const;
 	FORCEINLINE float& operator[](int InIndex);
+	// 벡터 역원과의 덧셈 연산자
 	FORCEINLINE Vector2 operator-() const;
+	// 벡터와 스칼라의 곱셉 연산자
 	FORCEINLINE Vector2 operator*(float InScalar) const;
+	// 스칼라 역원의 곱셈 연산자
 	FORCEINLINE Vector2 operator/(float InScalar) const;
+	// 벡터 덧셈 연산자
 	FORCEINLINE Vector2 operator+(const Vector2& InVector) const;
+	// 벡터 역원과의 덧셈 연산자
 	FORCEINLINE Vector2 operator-(const Vector2& InVector) const;
 	FORCEINLINE Vector2& operator*=(float InScale);
 	FORCEINLINE Vector2& operator/=(float InScale);
@@ -36,6 +41,7 @@ public:
 	static const Vector2 UnitX;
 	static const Vector2 UnitY;
 	static const Vector2 One;
+	// 벡터 덧셈의 항등원
 	static const Vector2 Zero;
 	static const Vector2 Infinity;
 	static const Vector2 InfinityNeg;
