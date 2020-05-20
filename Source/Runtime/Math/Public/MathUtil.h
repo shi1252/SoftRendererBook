@@ -49,6 +49,11 @@ struct Math
 		return InDegree * PI / 180.f;
 	}
 
+	static constexpr FORCEINLINE float Rad2Deg(float rad)
+	{
+		return rad * (180.f / PI);
+	}
+
 	template<class T>
 	static constexpr FORCEINLINE T Max(const T A, const T B)
 	{

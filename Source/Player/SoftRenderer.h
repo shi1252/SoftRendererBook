@@ -52,10 +52,9 @@ private:
 	void DrawGrid2D();
 
 	int _Grid2DUnit = 10;
-	Vector2 _CurrentPosition = Vector2::One * 10.f;
+	Vector2 _StartPosition = Vector2::Zero;
+	Vector2 _EndPosition = Vector2(500.f, 0.f);
 	LinearColor _CurrentColor = LinearColor::Blue;
-	Matrix2x2 _DeltaTransform;
-	Transform _Transform;
 
 private:
 	// 초기화 점검 변수
@@ -83,4 +82,6 @@ private:
 
 	// 게임 엔진
 	GameEngine _GameEngine;
+
+	float _MoveSpeed = 100.f;
 };

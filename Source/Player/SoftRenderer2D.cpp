@@ -8,80 +8,93 @@ void SoftRenderer::DrawGrid2D()
 	// 그리드 색상
 	LinearColor gridColor(LinearColor(0.8f, 0.8f, 0.8f, 0.3f));
 
-	// 가로 세로 라인 그리기
-	ScreenPoint screenHalfSize = _ScreenSize.GetHalf();
+	// 뷰의 영역 계산
+	Vector2 viewPos = _GameEngine.FindGameObjectWithName("Camera")->GetTransform2D().GetPosition();
+	Vector2 extent = Vector2(_ScreenSize.X * 0.5f, _ScreenSize.Y * 0.5f);
 
-	for (int x = screenHalfSize._X; x <= _ScreenSize._X; x += _Grid2DUnit)
+	// 좌측 하단에서부터 격자 그리기
+	int xGridCount = _ScreenSize.X / _Grid2DUnit;
+	int yGridCount = _ScreenSize.Y / _Grid2DUnit;
+
+	// 그리드가 시작되는 좌하단 좌표 값 계산
+	Vector2 minPos = viewPos - extent;
+	Vector2 minGridPos = Vector2(ceilf(minPos.X / (float)_Grid2DUnit), ceilf(minPos.Y / (float)_Grid2DUnit)) * (float)_Grid2DUnit;
+	ScreenPoint gridBottomLeft = ScreenPoint::ToScreenCoordinate(_ScreenSize, minGridPos - viewPos);
+
+	for (int ix = 0; ix < xGridCount; ++ix)
 	{
-		_RSI->DrawFullVerticalLine(x, gridColor);
-		if (x > screenHalfSize._X)
-		{
-			_RSI->DrawFullVerticalLine(2 * screenHalfSize._X - x, gridColor);
-		}
+		_RSI->DrawFullVerticalLine(gridBottomLeft.X + ix * _Grid2DUnit, gridColor);
 	}
 
-	for (int y = screenHalfSize._Y; y <= _ScreenSize._Y; y += _Grid2DUnit)
+	for (int iy = 0; iy < yGridCount; ++iy)
 	{
-		_RSI->DrawFullHorizontalLine(y, gridColor);
-		if (y > screenHalfSize._Y)
-		{
-			_RSI->DrawFullHorizontalLine(2 * screenHalfSize._Y - y, gridColor);
-		}
+		_RSI->DrawFullHorizontalLine(gridBottomLeft.Y - iy * _Grid2DUnit, gridColor);
 	}
 
-	// 월드 축 그리기
-	_RSI->DrawFullHorizontalLine(screenHalfSize._Y, LinearColor::Red);
-	_RSI->DrawFullVerticalLine(screenHalfSize._X, LinearColor::Green);
+	// 월드의 원점
+	ScreenPoint worldOrigin = ScreenPoint::ToScreenCoordinate(_ScreenSize, -viewPos);
+	_RSI->DrawFullHorizontalLine(worldOrigin.Y, LinearColor::Red);
+	_RSI->DrawFullVerticalLine(worldOrigin.X, LinearColor::Green);
 }
+
 
 // 게임 로직
 void SoftRenderer::Update2D(float InDeltaSeconds)
 {
-	static float time = 0.f;
+	InputManager input = _GameEngine.GetInputManager();
 
-	time += InDeltaSeconds;
-	if (time >= 4.f) time -= 4.f;
+	Transform2D& player =_GameEngine.FindGameObjectWithName("Player")->GetTransform2D();
+	Vector2 deltaPosition = Vector2(input.GetXAxis(), input.GetYAxis()) * _MoveSpeed * InDeltaSeconds;
+	player.AddPosition(deltaPosition);
 
-	float y = 0.f;
-	if (time <= 2.f)
-	{
-		y = sinf(time * Math::PI);
-		_Transform.SetPosition(Vector2(time, y * 0.5f));
-	}
-	else
-	{
-		float x = 4 - time;
-		y = -sinf(x * Math::PI);
-		_Transform.SetPosition(Vector2(x, y * 0.5f));
-	}
+	Transform2D& camera = _GameEngine.FindGameObjectWithName("Camera")->GetTransform2D();
+	camera.SetPosition(camera.GetPosition() * (1.f - InDeltaSeconds) + player.GetPosition() * (InDeltaSeconds));
 
-	float div = time / 4.f;
-	Vector3 r(1.f, 0.f, 0.f), g(0.f, 1.f, 0.f), b(0.f, 0.f, 1.f);
-	Vector3 color = (r * powf((1.f - div), 2.f) + g * 2.f * div * (1.f - div) + b * powf(div, 2.f));
-	_CurrentColor._R = color._X;
-	_CurrentColor._G = color._Y;
-	_CurrentColor._B = color._Z;
+	_CurrentColor = input.SpacePressed() ? LinearColor::Red : LinearColor::Blue;
 }
 
-// 렌더링 로직
 void SoftRenderer::Render2D()
 {
 	// 격자 그리기
 	DrawGrid2D();
 
-	Vector3 curPos(0.f, 0.f, 1.f);
+	////////////////////// 월드 공간 //////////////////////
+	Matrix3x3 viewMat = ((Camera2D*)_GameEngine.FindGameObjectWithName("Camera"))->GetViewMatrix();
 
-	for (int i = 0; i < 12; ++i)
+	for (auto& go : _GameEngine.GetGameObjects())
 	{
-		float cos = cosf(Math::Deg2Rad(i * 30.f));
-		float sin = sinf(Math::Deg2Rad(i * 30.f));
-		Vector3 newPos = (_Transform.GetModelingMatrix() * curPos) * 100.f;
-		Matrix3x3 rotMat(Vector3(cos, sin, 0.f), Vector3(-sin, cos, 0.f), Vector3(0.f, 0.f, 1.f));
-		newPos = rotMat * newPos;
-		_RSI->DrawPoint(newPos.ToVector2(), _CurrentColor);
-		_RSI->DrawPoint((newPos + Vector3::UnitX).ToVector2(), _CurrentColor);
-		_RSI->DrawPoint((newPos - Vector3::UnitX).ToVector2(), _CurrentColor);
-		_RSI->DrawPoint((newPos + Vector3::UnitY).ToVector2(), _CurrentColor);
-		_RSI->DrawPoint((newPos - Vector3::UnitY).ToVector2(), _CurrentColor);
+		const Mesh2D* mesh = go->GetMesh();
+		if (!mesh) continue;
+
+		size_t vertexCount = mesh->_Vertices.size();
+		size_t indexCount = mesh->_Indices.size();
+		size_t triangleCount = indexCount / 3;
+
+		// 정점 배열과 인덱스 배열 생성
+		Vector2* vertices = new Vector2[vertexCount];
+		memcpy(vertices, &mesh->_Vertices[0], sizeof(Vector2) * vertexCount);
+		int* indices = new int[indexCount];
+		memcpy(indices, &mesh->_Indices[0], sizeof(int) * indexCount);
+
+		//_RSI->PushStatisticText(playerTransform.GetPosition().ToString());
+
+		// 변환 행렬의 설계
+		Matrix3x3 finalMat = viewMat * go->GetTransform2D().GetModelingMatrix();
+
+		// 정점에 행렬을 적용
+		for (int vi = 0; vi < vertexCount; ++vi)
+		{
+			vertices[vi] = finalMat * vertices[vi];
+		}
+
+		// 변환된 정점을 잇는 선 그리기
+		for (int ti = 0; ti < triangleCount; ++ti)
+		{
+			int bi = ti * 3;
+			_RSI->DrawLine(vertices[indices[bi]], vertices[indices[bi + 1]], _CurrentColor);
+			_RSI->DrawLine(vertices[indices[bi]], vertices[indices[bi + 2]], _CurrentColor);
+			_RSI->DrawLine(vertices[indices[bi + 1]], vertices[indices[bi + 2]], _CurrentColor);
+		}
+
 	}
 }

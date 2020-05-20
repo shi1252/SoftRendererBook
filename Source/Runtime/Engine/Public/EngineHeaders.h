@@ -2,6 +2,9 @@
 
 #include "InputManager.h"
 
-#include "GameEngine.h"
+#include "Mesh2D.h"
+#include "Transform2D.h"
+#include "GameObject2D.h"
+#include "Camera2D.h"
 
-#include "Transform.h"
+#include "GameEngine.h"
