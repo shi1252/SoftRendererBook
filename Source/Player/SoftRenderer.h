@@ -84,4 +84,5 @@ private:
 	GameEngine _GameEngine;
 
 	float _MoveSpeed = 100.f;
+	bool _QuadCullOn = false;
 };

@@ -10,6 +10,11 @@ public:
 	std::vector<Vector2>& GetVertices() { return _Vertices; }
 	std::vector<int>& GetIndices() { return _Indices; }
 
-private:
+	void CreateBound();
+	Circle GetCircleBound() const { return _CircleBound; }
+	Rectangle GetRectBound() const { return _RectBound; }
 
+private:
+	Circle _CircleBound;
+	Rectangle _RectBound;
 };

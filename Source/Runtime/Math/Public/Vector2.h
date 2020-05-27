@@ -24,6 +24,9 @@ public:
 	FORCEINLINE Vector2& operator/=(float InScale);
 	FORCEINLINE Vector2& operator+=(const Vector2& InVector);
 	FORCEINLINE Vector2& operator-=(const Vector2& InVector);
+	FORCEINLINE bool operator==(const Vector2& InVector);
+	FORCEINLINE bool operator<(const Vector2& InVector);
+	FORCEINLINE bool operator<=(const Vector2& InVector);
 
 	// ¸â¹öÇÔ¼ö 
 	FORCEINLINE float Size() const;
@@ -137,6 +140,23 @@ FORCEINLINE Vector2& Vector2::operator-=(const Vector2& InVector)
 	X -= InVector.X;
 	Y -= InVector.Y;
 	return *this;
+}
+
+FORCEINLINE bool Vector2::operator==(const Vector2& InVector)
+{
+	return (this->X == InVector.X && this->Y == InVector.Y);
+	//return (((InVector.X - this->X) < FLT_EPSILON && (InVector.X - this->X) > -FLT_EPSILON)
+	//	&& ((InVector.Y - this->Y) < FLT_EPSILON && (InVector.Y - this->Y) > -FLT_EPSILON));
+}
+
+FORCEINLINE bool Vector2::operator<(const Vector2& InVector)
+{
+	return (this->X < InVector.X && this->Y < InVector.Y);
+}
+
+FORCEINLINE bool Vector2::operator<=(const Vector2& InVector)
+{
+	return operator<(InVector) || operator==(InVector);
 }
 
 FORCEINLINE bool Vector2::EqualsInTolerance(const Vector2& InVector, float InTolerance) const

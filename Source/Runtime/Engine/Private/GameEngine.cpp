@@ -3,12 +3,15 @@
 #include "Mesh2D.h"
 #include "Transform2D.h"
 #include "GameObject2D.h"
+#include "Quadtree.h"
 #include "Camera2D.h"
 #include "GameEngine.h"
 #include <random>
 
-bool GameEngine::Init()
+bool GameEngine::Init(const ScreenPoint& InScreenSize)
 {
+	_ViewportSize = InScreenSize;
+
 	if (!_InputManager.GetXAxis || !_InputManager.GetYAxis || !_InputManager.SpacePressed)
 	{
 		return false;
@@ -29,21 +32,29 @@ bool GameEngine::Init()
 
 bool GameEngine::LoadScene()
 {
-	static float initScale = 100.f;
-	_GameObject.push_back(std::make_unique<GameObject2D>("Player", _Mesh["QuadMesh"].get()));
-	_GameObject[_GameObject.size() - 1]->GetTransform2D().SetScale(Vector2(initScale, initScale));
+	static float initScale = 10.f;
+	auto player = GameObject2D("Player", _Mesh["QuadMesh"].get());
+	player.GetTransform2D().SetScale(Vector2(initScale, initScale));
+	PushGameObject(&player);
 
-	_GameObject.push_back(std::make_unique<Camera2D>("Camera"));
+	auto camera = Camera2D("Camera");
+	camera.SetCameraViewSize(_ViewportSize);
+	_Camera = std::make_unique<Camera2D>(camera);//PushGameObject(&camera);
 
 	std::random_device rd;
 	std::mt19937 mt(rd());
-	std::uniform_real_distribution<float> dist(-1000.f, 1000.f);
+	std::uniform_real_distribution<float> dist(-10000.f, 10000.f);
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 10000; ++i)
 	{
-		_GameObject.push_back(std::make_unique<GameObject2D>("QuadObject", _Mesh["QuadMesh"].get()));
-		_GameObject[_GameObject.size() - 1]->GetTransform2D().SetScale(Vector2(initScale, initScale));
-		_GameObject[_GameObject.size() - 1]->GetTransform2D().SetPosition(Vector2(dist(mt), dist(mt)));
+		GameObject2D go = GameObject2D("QuadObject", _Mesh["QuadMesh"].get());
+		go.GetTransform2D().SetScale(Vector2(initScale, initScale));
+		go.GetTransform2D().SetPosition(Vector2(dist(mt), dist(mt)));
+		PushGameObject(&go);
+		//_GameObject.push_back(std::move(ptr));
+		//_GameObject.push_back(std::make_unique<GameObject2D>("QuadObject", _Mesh["QuadMesh"].get()));
+		//_GameObject[_GameObject.size() - 1]->GetTransform2D().SetScale(Vector2(initScale, initScale));
+		//_GameObject[_GameObject.size() - 1]->GetTransform2D().SetPosition(Vector2(dist(mt), dist(mt)));
 	}
 
 	return true;
@@ -69,16 +80,82 @@ bool GameEngine::LoadResource()
 		0, 2, 3
 	};
 
+	_Mesh["QuadMesh"].get()->CreateBound();
+
 	return true;
+}
+
+auto lower_bound(std::vector<std::unique_ptr<GameObject2D>>::iterator first, std::vector<std::unique_ptr<GameObject2D>>::iterator last, GameObject2D* value)
+{
+	std::vector<std::unique_ptr<GameObject2D>>::iterator it;
+	typename std::iterator_traits<std::vector<std::unique_ptr<GameObject2D>>::iterator>::difference_type count, step;
+	count = std::distance(first, last);
+
+	while (count > 0) {
+		it = first;
+		step = count / 2;
+		std::advance(it, step);
+		if ((*(*it).get()) < (*value)) {
+			first = ++it;
+			count -= step + 1;
+		}
+		else
+			count = step;
+	}
+	return first;
+}
+
+void GameEngine::PushGameObject(GameObject2D* go)
+{
+	auto lb = lower_bound(_GameObject.begin(), _GameObject.end(), go);
+
+	auto ptr = std::make_unique<GameObject2D>((*go));
+	int idx = 0;
+	if (lb == _GameObject.end())
+	{
+		idx = _GameObject.size();
+		_GameObject.push_back(std::move(ptr));
+	}
+	else
+	{
+		if ((*lb).get()->GetHash() == (*go).GetHash())
+			return;
+
+		idx = (_GameObject.insert(lb, std::move(ptr))) - _GameObject.begin();
+	}
+
+	if (_GameObjectWithName.find((*go).GetName()) == _GameObjectWithName.end())
+	{
+		_GameObjectWithName[(*go).GetName()] = std::vector<GameObject2D*>();
+	}
+	_GameObjectWithName[(*go).GetName()].push_back(_GameObject[idx].get());
+
+#pragma region Quadtree
+	if (!_Quadtree)
+		_Quadtree = std::make_unique<Quadtree>();
+
+	Rectangle rect = _GameObject[idx].get()->GetMesh()->GetRectBound();
+	rect.Min *= _GameObject[idx].get()->GetTransform2D().GetScale().Max();
+	rect.Max *= _GameObject[idx].get()->GetTransform2D().GetScale().Max();
+	rect.Min += _GameObject[idx].get()->GetTransform2D().GetPosition();
+	rect.Max += _GameObject[idx].get()->GetTransform2D().GetPosition();
+	_Quadtree->Insert(_GameObject[idx].get(), rect);
+#pragma endregion
 }
 
 GameObject2D* GameEngine::FindGameObjectWithName(std::string name)
 {
-	for (auto& go : _GameObject)
-	{
-		if (go.get()->GetName().compare(name) == 0)
-			return go.get();
-	}
+	if (_GameObjectWithName.find(name) == _GameObjectWithName.end()
+		|| _GameObjectWithName[name].size() <= 0)
+		return nullptr;
 
-	return nullptr;
+	return _GameObjectWithName[name][0];
+
+	//for (auto& go : _GameObject)
+	//{
+	//	if (go.get()->GetName().compare(name) == 0)
+	//		return go.get();
+	//}
+
+	//return nullptr;
 }
