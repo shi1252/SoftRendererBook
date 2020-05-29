@@ -4,7 +4,9 @@ class Quadtree
 {
 public:
 	Quadtree(const Vector2& inMinVector = Vector2::One * (-FLT_MAX), const Vector2& inMaxVector = Vector2::One * FLT_MAX)
-		: size(Rectangle(inMinVector, inMaxVector)) {}
+		: size(Rectangle(inMinVector, inMaxVector)) {
+		childs = std::make_unique<std::unique_ptr<Quadtree>[]>(4);
+	}
 	Quadtree(const Rectangle& rect) : size(rect) {}
 	~Quadtree();
 
@@ -27,5 +29,6 @@ public:
 private:
 	std::vector<GameObject2D*> list;
 	Rectangle size;
-	Quadtree* childs[4] = { nullptr, nullptr, nullptr, nullptr };
+	std::unique_ptr<std::unique_ptr<Quadtree>[]> childs;
+	//Quadtree* childs[4] = { nullptr, nullptr, nullptr, nullptr };
 };

@@ -1,4 +1,5 @@
 #include "Precompiled.h"
+#include <memory>
 #include "Mesh2D.h"
 #include "Transform2D.h"
 #include "GameObject2D.h"
@@ -6,14 +7,14 @@
 
 Quadtree::~Quadtree()
 {
-	for (int i = NW; i < SE; ++i)
-	{
-		if (childs[i] != nullptr)
-		{
-			delete childs[i];
-			childs[i] = nullptr;
-		}
-	}
+	//for (int i = NW; i < SE; ++i)
+	//{
+	//	if (childs[i] != nullptr)
+	//	{
+	//		delete childs[i];
+	//		childs[i] = nullptr;
+	//	}
+	//}
 }
 
 void Quadtree::Insert(GameObject2D* go, const Rectangle& rect)
@@ -27,7 +28,7 @@ void Quadtree::Insert(GameObject2D* go, const Rectangle& rect)
  		list.push_back(go);
 	}
 	else
-	{
+	{ 
 		switch (section)
 		{
 		case NW:
@@ -35,7 +36,7 @@ void Quadtree::Insert(GameObject2D* go, const Rectangle& rect)
 			{
 				Vector2 min = Vector2(size.Min.X, (size.Min.Y + size.Max.Y) / 2.f);
 				Vector2 max = Vector2((size.Min.X + size.Max.X) / 2.f, size.Max.Y);
-				childs[NW] = new Quadtree(min, max);
+				childs[NW] = std::make_unique<Quadtree>(min, max);//std::make_unique<Quadtree>(min, max));//new Quadtree(min, max);
 			}
 			childs[NW]->Insert(go, rect);
 			return;
@@ -44,7 +45,7 @@ void Quadtree::Insert(GameObject2D* go, const Rectangle& rect)
 			{
 				Vector2 min = Vector2((size.Min.X + size.Max.X) / 2.f, (size.Min.Y + size.Max.Y) / 2.f);
 				Vector2 max = Vector2(size.Max.X, size.Max.Y);
-				childs[NE] = new Quadtree(min, max);
+				childs[NE] = std::make_unique<Quadtree>(min, max);//new Quadtree(min, max);
 			}
 			childs[NE]->Insert(go, rect);
 			return;
@@ -53,7 +54,7 @@ void Quadtree::Insert(GameObject2D* go, const Rectangle& rect)
 			{
 				Vector2 min = Vector2(size.Min.X, size.Min.Y);
 				Vector2 max = Vector2((size.Min.X + size.Max.X) / 2.f, (size.Min.Y + size.Max.Y) / 2.f);
-				childs[SW] = new Quadtree(min, max);
+				childs[SW] = std::make_unique<Quadtree>(min, max);//new Quadtree(min, max);
 			}
 			childs[SW]->Insert(go, rect);
 			return;
@@ -62,7 +63,7 @@ void Quadtree::Insert(GameObject2D* go, const Rectangle& rect)
 			{
 				Vector2 min = Vector2((size.Min.X + size.Max.X) / 2.f, size.Min.Y);
 				Vector2 max = Vector2(size.Max.X, (size.Min.Y + size.Max.Y) / 2.f);
-				childs[SE] = new Quadtree(min, max);
+				childs[SE] = std::make_unique<Quadtree>(min, max);//new Quadtree(min, max);
 			}
 			childs[SE]->Insert(go, rect);
 			return;
