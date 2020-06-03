@@ -25,15 +25,16 @@ public:
 	Vector2 GetWorldScale() const { return WorldScale; }
 	float GetWorldRotation() const { return WorldRotation; }
 
-	void SetPosition(const Vector2& InPosition) { Position = InPosition; }
-	void AddPosition(const Vector2& InDeltaPosition) { Position += InDeltaPosition; }
-	void SetScale(const Vector2& InScale) { Scale = InScale; }
-	void SetRotation(float InDegree) { Rotation = InDegree; CalculateLocalAxis(); }
-	void AddRotation(float InDegree) { Rotation += InDegree; CalculateLocalAxis(); }
+	//void SetPosition(const Vector2& InPosition) { Position = InPosition; }
+	//void AddPosition(const Vector2& InDeltaPosition) { Position += InDeltaPosition; }
+	//void SetScale(const Vector2& InScale) { Scale = InScale; }
+	//void SetRotation(float InDegree) { Rotation = InDegree; CalculateLocalAxis(); }
+	//void AddRotation(float InDegree) { Rotation += InDegree; CalculateLocalAxis(); }
 
-	Vector2 GetPosition() const { return Position; }
-	Vector2 GetScale() const { return Scale; }
-	float GetRotation() const { return Rotation; }
+	//Vector2 GetPosition() const { return Position; }
+	//Vector2 GetScale() const { return Scale; }
+	//float GetRotation() const { return Rotation; }
+
 	Matrix3x3 GetModelingMatrix() const;
 	Matrix3x3 GetInvModelingMatrix() const;
 	Matrix3x3 GetWorldModelingMatrix() const;

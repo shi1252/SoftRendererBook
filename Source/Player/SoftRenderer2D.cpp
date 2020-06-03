@@ -9,7 +9,7 @@ void SoftRenderer::DrawGrid2D()
 	LinearColor gridColor(LinearColor(0.8f, 0.8f, 0.8f, 0.3f));
 
 	// 뷰의 영역 계산
-	Vector2 viewPos = _GameEngine.GetCamera()->GetTransform2D().GetPosition();
+	Vector2 viewPos = _GameEngine.GetCamera()->GetTransform2D().GetLocalPosition();
 		//_GameEngine.FindGameObjectWithName("Camera")->GetTransform2D().GetPosition();
 	Vector2 extent = Vector2(_ScreenSize.X * 0.5f, _ScreenSize.Y * 0.5f);
 
@@ -62,7 +62,7 @@ void SoftRenderer::Update2D(float InDeltaSeconds)
 
 	Transform2D& camera = _GameEngine.GetCamera()->GetTransform2D();
 		//_GameEngine.FindGameObjectWithName("Camera")->GetTransform2D();
-	camera.SetPosition(camera.GetPosition() * (1.f - InDeltaSeconds) + player.GetPosition() * (InDeltaSeconds));
+	camera.SetLocalPosition(camera.GetLocalPosition() * (1.f - InDeltaSeconds) + player.GetWorldPosition() * (InDeltaSeconds));
 
 	_CurrentColor = input.SpacePressed() ? LinearColor::Red : LinearColor::Blue;
 }
@@ -75,11 +75,11 @@ void SoftRenderer::Render2D()
 	Camera2D* camera = _GameEngine.GetCamera();//(Camera2D*)_GameEngine.FindGameObjectWithName("Camera");
 
 	Circle camCircle = camera->GetCircleBound();
-	camCircle.Center += camera->GetTransform2D().GetPosition();
+	camCircle.Center += camera->GetTransform2D().GetWorldPosition();
 
-	Vector2 min = Vector2(camera->GetTransform2D().GetPosition() //+ Vector2::One * -100.f);
+	Vector2 min = Vector2(camera->GetTransform2D().GetWorldPosition() //+ Vector2::One * -100.f);
 																 + camera->GetRectBound().Min);
-	Vector2 max = Vector2(camera->GetTransform2D().GetPosition() //+ Vector2::One * 100.f);
+	Vector2 max = Vector2(camera->GetTransform2D().GetWorldPosition() //+ Vector2::One * 100.f);
 																 + camera->GetRectBound().Max);
 	Rectangle camRect = Rectangle(min, max);
 
@@ -104,8 +104,8 @@ void SoftRenderer::Render2D()
 			if (!mesh) continue;
 
 			Circle goCircle = mesh->GetCircleBound();
-			goCircle.Center += go->GetTransform2D().GetPosition();
-			goCircle.Radius = goCircle.Radius * go->GetTransform2D().GetScale().Max();
+			goCircle.Center += go->GetTransform2D().GetWorldPosition();
+			goCircle.Radius = goCircle.Radius * go->GetTransform2D().GetWorldScale().Max();
 			if (!camCircle.Intersect(goCircle))
 			{
 				++numCircleCulled;
@@ -114,10 +114,10 @@ void SoftRenderer::Render2D()
 
 			++numCircleDrawed;
 
-			Vector2 min = mesh->GetRectBound().Min * go->GetTransform2D().GetScale().Max();
-			Vector2 max = mesh->GetRectBound().Max * go->GetTransform2D().GetScale().Max();
-			min = min + go->GetTransform2D().GetPosition();
-			max = max + go->GetTransform2D().GetPosition();
+			Vector2 min = mesh->GetRectBound().Min * go->GetTransform2D().GetWorldScale().Max();
+			Vector2 max = mesh->GetRectBound().Max * go->GetTransform2D().GetWorldScale().Max();
+			min = min + go->GetTransform2D().GetWorldPosition();
+			max = max + go->GetTransform2D().GetWorldPosition();
 			Rectangle goRect = Rectangle(min, max);
 
 			if (!camRect.Intersect(goRect))
@@ -170,8 +170,8 @@ void SoftRenderer::Render2D()
 			if (!mesh) continue;
 
 			Circle goCircle = mesh->GetCircleBound();
-			goCircle.Center += go->GetTransform2D().GetPosition();
-			goCircle.Radius = goCircle.Radius * go->GetTransform2D().GetScale().Max();
+			goCircle.Center += go->GetTransform2D().GetWorldPosition();
+			goCircle.Radius = goCircle.Radius * go->GetTransform2D().GetWorldScale().Max();
 			if (!camCircle.Intersect(goCircle))
 			{
 				++numCircleCulled;
@@ -180,10 +180,10 @@ void SoftRenderer::Render2D()
 
 			++numCircleDrawed;
 
-			Vector2 min = mesh->GetRectBound().Min * go->GetTransform2D().GetScale().Max();
-			Vector2 max = mesh->GetRectBound().Max * go->GetTransform2D().GetScale().Max();
-			min = min + go->GetTransform2D().GetPosition();
-			max = max + go->GetTransform2D().GetPosition();
+			Vector2 min = mesh->GetRectBound().Min * go->GetTransform2D().GetWorldScale().Max();
+			Vector2 max = mesh->GetRectBound().Max * go->GetTransform2D().GetWorldScale().Max();
+			min = min + go->GetTransform2D().GetWorldPosition();
+			max = max + go->GetTransform2D().GetWorldPosition();
 			Rectangle goRect = Rectangle(min, max);
 
 			if (!camRect.Intersect(goRect))
