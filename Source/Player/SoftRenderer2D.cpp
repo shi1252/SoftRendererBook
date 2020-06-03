@@ -51,7 +51,14 @@ void SoftRenderer::Update2D(float InDeltaSeconds)
 
 	Transform2D& player =_GameEngine.FindGameObjectWithName("Player")->GetTransform2D();
 	Vector2 deltaPosition = Vector2(input.GetXAxis(), input.GetYAxis()) * _MoveSpeed * InDeltaSeconds;
-	player.AddPosition(deltaPosition);
+	player.AddLocalPosition(deltaPosition);
+	player.AddLocalRotation(90.f * InDeltaSeconds);
+
+	Transform2D& earth = _GameEngine.FindGameObjectWithName("Earth")->GetTransform2D();
+	earth.AddLocalRotation(45.f * InDeltaSeconds);
+
+	Transform2D& moon = _GameEngine.FindGameObjectWithName("Moon")->GetTransform2D();
+	moon.AddLocalRotation(20.f * InDeltaSeconds);
 
 	Transform2D& camera = _GameEngine.GetCamera()->GetTransform2D();
 		//_GameEngine.FindGameObjectWithName("Camera")->GetTransform2D();
@@ -134,7 +141,7 @@ void SoftRenderer::Render2D()
 			//_RSI->PushStatisticText(playerTransform.GetPosition().ToString());
 
 			// 변환 행렬의 설계
-			Matrix3x3 finalMat = viewMat * go->GetTransform2D().GetModelingMatrix();
+			Matrix3x3 finalMat = viewMat * go->GetTransform2D().GetWorldModelingMatrix();
 
 			// 정점에 행렬을 적용
 			for (int vi = 0; vi < vertexCount; ++vi)
@@ -200,7 +207,7 @@ void SoftRenderer::Render2D()
 			//_RSI->PushStatisticText(playerTransform.GetPosition().ToString());
 
 			// 변환 행렬의 설계
-			Matrix3x3 finalMat = viewMat * go->GetTransform2D().GetModelingMatrix();
+			Matrix3x3 finalMat = viewMat * go->GetTransform2D().GetWorldModelingMatrix();
 
 			// 정점에 행렬을 적용
 			for (int vi = 0; vi < vertexCount; ++vi)

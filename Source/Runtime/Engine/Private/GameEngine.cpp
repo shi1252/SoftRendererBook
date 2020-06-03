@@ -32,30 +32,43 @@ bool GameEngine::Init(const ScreenPoint& InScreenSize)
 
 bool GameEngine::LoadScene()
 {
-	static float initScale = 10.f;
+	static float initScale = 50.f;
 	auto player = GameObject2D("Player", _Mesh["QuadMesh"].get());
-	player.GetTransform2D().SetScale(Vector2(initScale, initScale));
+	player.GetTransform2D().SetLocalScale(Vector2(initScale, initScale));
 	PushGameObject(&player);
 
 	auto camera = Camera2D("Camera");
 	camera.SetCameraViewSize(_ViewportSize);
 	_Camera = std::make_unique<Camera2D>(camera);//PushGameObject(&camera);
 
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	std::uniform_real_distribution<float> dist(-10000.f, 10000.f);
+	GameObject2D earth = GameObject2D("Earth", _Mesh["QuadMesh"].get());
+	earth.GetTransform2D().SetLocalScale(Vector2(initScale / 2.f, initScale / 2.f));
+	earth.GetTransform2D().SetLocalPosition(Vector2(100.f,  0.f));
+	PushGameObject(&earth);
 
-	for (int i = 0; i < 10000; ++i)
-	{
-		GameObject2D go = GameObject2D("QuadObject", _Mesh["QuadMesh"].get());
-		go.GetTransform2D().SetScale(Vector2(initScale, initScale));
-		go.GetTransform2D().SetPosition(Vector2(dist(mt), dist(mt)));
-		PushGameObject(&go);
-		//_GameObject.push_back(std::move(ptr));
-		//_GameObject.push_back(std::make_unique<GameObject2D>("QuadObject", _Mesh["QuadMesh"].get()));
-		//_GameObject[_GameObject.size() - 1]->GetTransform2D().SetScale(Vector2(initScale, initScale));
-		//_GameObject[_GameObject.size() - 1]->GetTransform2D().SetPosition(Vector2(dist(mt), dist(mt)));
-	}
+	GameObject2D moon = GameObject2D("Moon", _Mesh["QuadMesh"].get());
+	moon.GetTransform2D().SetLocalScale(Vector2(initScale / 4.f, initScale / 4.f));
+	moon.GetTransform2D().SetLocalPosition(Vector2(135.f, 0.f));
+	PushGameObject(&moon);
+
+	FindGameObjectWithName("Earth")->GetTransform2D().SetParent(&FindGameObjectWithName("Player")->GetTransform2D());
+	FindGameObjectWithName("Moon")->GetTransform2D().SetParent(&FindGameObjectWithName("Earth")->GetTransform2D());
+
+	//std::random_device rd;
+	//std::mt19937 mt(rd());
+	//std::uniform_real_distribution<float> dist(-10000.f, 10000.f);
+
+	//for (int i = 0; i < 10000; ++i)
+	//{
+	//	GameObject2D go = GameObject2D("QuadObject", _Mesh["QuadMesh"].get());
+	//	go.GetTransform2D().SetScale(Vector2(initScale, initScale));
+	//	go.GetTransform2D().SetPosition(Vector2(dist(mt), dist(mt)));
+	//	PushGameObject(&go);
+	//	//_GameObject.push_back(std::move(ptr));
+	//	//_GameObject.push_back(std::make_unique<GameObject2D>("QuadObject", _Mesh["QuadMesh"].get()));
+	//	//_GameObject[_GameObject.size() - 1]->GetTransform2D().SetScale(Vector2(initScale, initScale));
+	//	//_GameObject[_GameObject.size() - 1]->GetTransform2D().SetPosition(Vector2(dist(mt), dist(mt)));
+	//}
 
 	return true;
 }
@@ -135,10 +148,10 @@ void GameEngine::PushGameObject(GameObject2D* go)
 		_Quadtree = std::make_unique<Quadtree>();
 
 	Rectangle rect = _GameObject[idx].get()->GetMesh()->GetRectBound();
-	rect.Min *= _GameObject[idx].get()->GetTransform2D().GetScale().Max();
-	rect.Max *= _GameObject[idx].get()->GetTransform2D().GetScale().Max();
-	rect.Min += _GameObject[idx].get()->GetTransform2D().GetPosition();
-	rect.Max += _GameObject[idx].get()->GetTransform2D().GetPosition();
+	rect.Min *= _GameObject[idx].get()->GetTransform2D().GetWorldScale().Max();
+	rect.Max *= _GameObject[idx].get()->GetTransform2D().GetWorldScale().Max();
+	rect.Min += _GameObject[idx].get()->GetTransform2D().GetWorldPosition();
+	rect.Max += _GameObject[idx].get()->GetTransform2D().GetWorldPosition();
 	_Quadtree->Insert(_GameObject[idx].get(), rect);
 #pragma endregion
 }
