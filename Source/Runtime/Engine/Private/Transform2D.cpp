@@ -173,6 +173,7 @@ void Transform2D::SetWorldScale(const Vector2& InScale)
 		Vector2 invScale = Vector2(1.f / _ParentPtr->WorldScale.X, 1.f / _ParentPtr->WorldScale.Y);
 		Scale = Vector2(WorldScale.X * invScale.X, WorldScale.Y * invScale.Y);
 	}
+	Update();
 }
 
 void Transform2D::SetWorldRotation(float InDegree)
@@ -186,6 +187,7 @@ void Transform2D::SetWorldRotation(float InDegree)
 	{
 		Rotation = WorldRotation - _ParentPtr->WorldRotation;
 	}
+	Update();
 }
 
 void Transform2D::AddWorldRotation(float InDeltaDegree)
@@ -199,6 +201,7 @@ void Transform2D::AddWorldRotation(float InDeltaDegree)
 	{
 		Rotation = WorldRotation - _ParentPtr->WorldRotation;
 	}
+	Update();
 }
 
 void Transform2D::SetWorldPosition(const Vector2& InPosition)
@@ -212,6 +215,7 @@ void Transform2D::SetWorldPosition(const Vector2& InPosition)
 	{
 		Position = _ParentPtr->GetInvWorldModelingMatrix() * WorldPosition;
 	}
+	Update();
 }
 
 void Transform2D::AddWorldPosition(const Vector2& InDeltaPosition)
@@ -225,4 +229,5 @@ void Transform2D::AddWorldPosition(const Vector2& InDeltaPosition)
 	{
 		Position = _ParentPtr->GetInvWorldModelingMatrix() * WorldPosition;
 	}
+	Update();
 }

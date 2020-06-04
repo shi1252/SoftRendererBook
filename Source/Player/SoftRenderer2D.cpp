@@ -52,13 +52,13 @@ void SoftRenderer::Update2D(float InDeltaSeconds)
 	Transform2D& player =_GameEngine.FindGameObjectWithName("Player")->GetTransform2D();
 	Vector2 deltaPosition = Vector2(input.GetXAxis(), input.GetYAxis()) * _MoveSpeed * InDeltaSeconds;
 	player.AddLocalPosition(deltaPosition);
-	player.AddLocalRotation(90.f * InDeltaSeconds);
+	player.AddWorldRotation(90.f * InDeltaSeconds);
 
 	Transform2D& earth = _GameEngine.FindGameObjectWithName("Earth")->GetTransform2D();
-	earth.AddLocalRotation(45.f * InDeltaSeconds);
+	earth.AddWorldRotation(45.f * InDeltaSeconds);
 
 	Transform2D& moon = _GameEngine.FindGameObjectWithName("Moon")->GetTransform2D();
-	moon.AddLocalRotation(20.f * InDeltaSeconds);
+	moon.AddWorldRotation(20.f * InDeltaSeconds);
 
 	Transform2D& camera = _GameEngine.GetCamera()->GetTransform2D();
 		//_GameEngine.FindGameObjectWithName("Camera")->GetTransform2D();
