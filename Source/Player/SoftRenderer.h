@@ -51,6 +51,11 @@ private:
 	void Render2D();
 	void DrawGrid2D();
 
+	// 3D 구현 함수
+	void DrawGizmo3D();
+	void Update3D(float InDeltaSeconds);
+	void Render3D();
+
 	int _Grid2DUnit = 10;
 	Vector2 _StartPosition = Vector2::Zero;
 	Vector2 _EndPosition = Vector2(500.f, 0.f);

@@ -9,7 +9,7 @@ void SoftRenderer::DrawGrid2D()
 	LinearColor gridColor(LinearColor(0.8f, 0.8f, 0.8f, 0.3f));
 
 	// 뷰의 영역 계산
-	Vector2 viewPos = _GameEngine.GetCamera()->GetTransform2D().GetLocalPosition();
+	Vector2 viewPos = _GameEngine.GetCamera2D()->GetTransform2D().GetLocalPosition();
 		//_GameEngine.FindGameObjectWithName("Camera")->GetTransform2D().GetPosition();
 	Vector2 extent = Vector2(_ScreenSize.X * 0.5f, _ScreenSize.Y * 0.5f);
 
@@ -49,18 +49,18 @@ void SoftRenderer::Update2D(float InDeltaSeconds)
 	else
 		_QuadCullOn = false;
 
-	Transform2D& player =_GameEngine.FindGameObjectWithName("Player")->GetTransform2D();
+	Transform2D& player =_GameEngine.FindGameObjectWithName2D("Player")->GetTransform2D();
 	Vector2 deltaPosition = Vector2(input.GetXAxis(), input.GetYAxis()) * _MoveSpeed * InDeltaSeconds;
 	player.AddLocalPosition(deltaPosition);
 	player.AddWorldRotation(90.f * InDeltaSeconds);
 
-	Transform2D& earth = _GameEngine.FindGameObjectWithName("Earth")->GetTransform2D();
+	Transform2D& earth = _GameEngine.FindGameObjectWithName2D("Earth")->GetTransform2D();
 	earth.AddWorldRotation(45.f * InDeltaSeconds);
 
-	Transform2D& moon = _GameEngine.FindGameObjectWithName("Moon")->GetTransform2D();
+	Transform2D& moon = _GameEngine.FindGameObjectWithName2D("Moon")->GetTransform2D();
 	moon.AddWorldRotation(20.f * InDeltaSeconds);
 
-	Transform2D& camera = _GameEngine.GetCamera()->GetTransform2D();
+	Transform2D& camera = _GameEngine.GetCamera2D()->GetTransform2D();
 		//_GameEngine.FindGameObjectWithName("Camera")->GetTransform2D();
 	camera.SetLocalPosition(camera.GetLocalPosition() * (1.f - InDeltaSeconds) + player.GetWorldPosition() * (InDeltaSeconds));
 
@@ -72,7 +72,7 @@ void SoftRenderer::Render2D()
 	// 격자 그리기
 	DrawGrid2D();
 
-	Camera2D* camera = _GameEngine.GetCamera();//(Camera2D*)_GameEngine.FindGameObjectWithName("Camera");
+	Camera2D* camera = _GameEngine.GetCamera2D();//(Camera2D*)_GameEngine.FindGameObjectWithName("Camera");
 
 	Circle camCircle = camera->GetCircleBound();
 	camCircle.Center += camera->GetTransform2D().GetWorldPosition();
@@ -89,7 +89,7 @@ void SoftRenderer::Render2D()
 	int numRectDrawed = 0;
 
 	////////////////////// 월드 공간 //////////////////////
-	Matrix3x3 viewMat = _GameEngine.GetCamera()->GetViewMatrix();
+	Matrix3x3 viewMat = _GameEngine.GetCamera2D()->GetViewMatrix();
 	//((Camera2D*)_GameEngine.FindGameObjectWithName("Camera"))->GetViewMatrix();
 
 	auto start = std::chrono::high_resolution_clock::now();
@@ -164,7 +164,7 @@ void SoftRenderer::Render2D()
 	}
 	else
 	{
-		for (auto& go : _GameEngine.GetGameObjects())
+		for (auto& go : _GameEngine.GetGameObjects2D())
 		{
 			const Mesh2D* mesh = go->GetMesh();
 			if (!mesh) continue;

@@ -22,6 +22,7 @@ public:
 	FORCEINLINE Vector3& operator/=(float InScale);
 	FORCEINLINE Vector3& operator+=(const Vector3& InVector);
 	FORCEINLINE Vector3& operator-=(const Vector3& InVector);
+	FORCEINLINE operator Vector2() const;
 
 	// ¸â¹öÇÔ¼ö 
 	FORCEINLINE Vector2 ToVector2() const;
@@ -148,6 +149,11 @@ FORCEINLINE Vector3& Vector3::operator-=(const Vector3& InVector)
 	Y -= InVector.Y;
 	Z -= InVector.Z;
 	return *this;
+}
+
+FORCEINLINE Vector3::operator Vector2() const
+{
+	return Vector2(X, Y);
 }
 
 FORCEINLINE bool Vector3::EqualsInTolerance(const Vector3& InVector, float InTolerance) const

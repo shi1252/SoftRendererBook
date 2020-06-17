@@ -6,24 +6,76 @@ public:
 	Transform() = default;
 
 public:
-	void SetPosition(const Vector2& InPosition) { Position = InPosition; }
-	void AddPosition(const Vector2& InDeltaPosition) { Position += InDeltaPosition; }
-	void SetScale(const Vector2& InScale) { Scale = InScale; }
-	void SetRotation(float InDegree) { Rotation = InDegree; CalculateLocalAxis(); }
+	void SetLocalPosition(const Vector3& InPosition);
+	void AddLocalPosition(const Vector3& InDeltaPosition);
+	void SetLocalScale(const Vector3& InScale);
+	void AddYawRotation(float yaw) { Rotation.Yaw += yaw; Rotation.Clamp(); Update(); }
+	void AddRollRotation(float roll) { Rotation.Roll  += roll; Rotation.Clamp(); Update(); }
+	void AddPitchRotation(float pitch) { Rotation.Pitch += pitch; Rotation.Clamp(); Update(); }
+	void SetLocalRotation(Rotator InDegree);
+	void AddLocalRotation(Rotator InDeltaDegree);
+	void SetWorldScale(const Vector3& InScale);
+	void SetWorldRotation(Rotator InDegree);
+	void AddWorldRotation(Rotator InDeltaDegree);
+	void SetWorldPosition(const Vector3& InPosition);
+	void AddWorldPosition(const Vector3& InDeltaPosition);
 
-	Vector2 GetPosition() const { return Position; }
-	Vector2 GetScale() const { return Scale; }
-	float GetRotation() const { return Rotation; }
-	Matrix3x3 GetModelingMatrix() const;
+	Vector3 GetLocalPosition() const { return Position; }
+	Vector3 GetLocalScale() const { return Scale; }
+	Rotator GetLocalRotation() const { return Rotation; }
+
+	Vector3 GetWorldPosition() const { return WorldPosition; }
+	Vector3 GetWorldScale() const { return WorldScale; }
+	Rotator GetWorldRotation() const { return WorldRotation; }
+
+	Matrix4x4 GetModelingMatrix() const;
+	Matrix4x4 GetInvModelingMatrix() const;
+	Matrix4x4 GetWorldModelingMatrix() const;
+	Matrix4x4 GetInvWorldModelingMatrix() const;
+	const Vector3& GetLocalX() const { return Right; }
+	const Vector3& GetLocalY() const { return Up; }
+
+	FORCEINLINE Transform* GetParent() const { return _ParentPtr; }
+	FORCEINLINE Transform& GetRoot() {
+		Transform* current = this;
+		Transform* parent = nullptr;
+		while ((parent = current->GetParent()) != nullptr)
+		{
+			current = parent;
+		}
+		return *current;
+	}
+	FORCEINLINE Transform& GetChild(BYTE InIndex) const
+	{
+		assert(InIndex < _Children.size());
+		return *_Children[InIndex];
+	}
+	bool SetParent(Transform* InTransformPtr);
+
+	void Update();
 
 private:
 	void CalculateLocalAxis();
+	void CalculateMatrices();
 
-	Vector2 Position = Vector2::Zero;
-	float Rotation = 0.f;
-	Vector2 Scale = Vector2::One;
+	Vector3 Position = Vector3::Zero;
+	Rotator Rotation = Rotator::Identity;
+	Vector3 Scale = Vector3::One;
 
-	Vector2 Right = Vector2::UnitX;
-	Vector2 Up = Vector2::UnitY;
+	Vector3 Right = Vector3::UnitX;
+	Vector3 Up = Vector3::UnitY;
+	Vector3 Forward = Vector3::UnitZ;
 
+	Vector3 WorldPosition = Vector3::Zero;
+	Rotator WorldRotation = Rotator::Identity;
+	Vector3 WorldScale = Vector3::One;
+
+	Matrix4x4 _LocalTRS;
+	Matrix4x4 _WorldTRS;
+
+	Transform* _ParentPtr = nullptr;
+	std::vector<Transform*> _Children;
+
+	friend class GameObject;
+	friend class Camera;
 };

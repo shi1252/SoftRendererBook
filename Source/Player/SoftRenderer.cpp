@@ -132,8 +132,8 @@ void SoftRenderer::Update()
 void SoftRenderer::BindTickFunctions()
 {
 	using namespace std::placeholders;
-	RenderFrameFunc = std::bind(&SoftRenderer::Render2D, this);
-	UpdateFunc = std::bind(&SoftRenderer::Update2D, this, _1);
+	RenderFrameFunc = std::bind(&SoftRenderer::Render3D, this);
+	UpdateFunc = std::bind(&SoftRenderer::Update3D, this, _1);
 	_TickFunctionBound = true;
 }
 

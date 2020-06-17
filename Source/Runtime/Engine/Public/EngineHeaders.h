@@ -8,4 +8,9 @@
 #include "Quadtree.h"
 #include "Camera2D.h"
 
+#include "Mesh.h"
+#include "Transform.h"
+#include "GameObject.h"
+#include "Camera.h"
+
 #include "GameEngine.h"
