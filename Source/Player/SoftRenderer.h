@@ -90,4 +90,7 @@ private:
 
 	float _MoveSpeed = 100.f;
 	bool _QuadCullOn = false;
+	bool _ClipFrustumCull = true;
+
+	float* depthBuffer;
 };

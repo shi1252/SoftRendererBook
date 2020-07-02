@@ -11,10 +11,12 @@ public:
 	std::vector<int>& GetIndices() { return _Indices; }
 
 	void CreateBound();
+	Sphere GetSphereBound() const { return _SphereBound; }
 	//Circle GetCircleBound() const { return _CircleBound; }
 	//Rectangle GetRectBound() const { return _RectBound; }
 
 private:
+	Sphere _SphereBound;
 	//Circle _CircleBound;
 	//Rectangle _RectBound;
 };

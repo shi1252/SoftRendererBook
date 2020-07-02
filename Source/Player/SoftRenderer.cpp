@@ -10,6 +10,8 @@ void SoftRenderer::OnTick()
 {
 	if (!_AllInitialized)
 	{
+		depthBuffer = new float[(_ScreenSize.X + 1) * (_ScreenSize.Y + 1)];
+
 		// 퍼포먼스 카운터 초기화.
 		if(PerformanceInitFunc && PerformanceMeasureFunc)
 		{
@@ -78,6 +80,7 @@ void SoftRenderer::OnResize(const ScreenPoint& InNewScreenSize)
 
 void SoftRenderer::OnShutdown()
 {
+	delete[] depthBuffer;
 	_RSI->Shutdown();
 }
 

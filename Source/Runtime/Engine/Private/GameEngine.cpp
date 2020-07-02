@@ -87,9 +87,21 @@ bool GameEngine::LoadScene()
 
 	auto camera = Camera("Camera");
 	//camera.SetCameraViewSize(_ViewportSize);
-	camera.GetTransform().SetWorldPosition(Vector3(0.f, 0.f, -500.f));//Vector3(500.f, 500.f, -500.f));
+	camera.GetTransform().SetWorldPosition(Vector3(500.f, 500.f, -500.f));//Vector3(500.f, 500.f, -500.f));
 	camera.SetLookAtRotation(Vector3::Zero);
 	_Camera = std::make_unique<Camera>(camera);//PushGameObject(&camera);
+
+	//std::random_device rd;
+	//std::mt19937 mt(rd());
+	//std::uniform_real_distribution<float> dist(-10000.f, 10000.f);
+
+	//for (int i = 0; i < 10000; ++i)
+	//{
+	//	GameObject go = GameObject("CubeObject", _Mesh["Cube"].get());
+	//	go.GetTransform().SetLocalScale(Vector3(initScale, initScale, initScale));
+	//	go.GetTransform().SetLocalPosition(Vector3(dist(mt), dist(mt), dist(mt)));
+	//	PushGameObject(&go);
+	//}
 #pragma endregion
 	return true;
 }

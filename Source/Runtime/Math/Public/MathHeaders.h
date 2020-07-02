@@ -17,5 +17,8 @@
 #include "Color32.h"
 #include "LinearColor.h"
 
+#include "Plane.h"
+
 #include "Circle.h"
 #include "Rectangle.h"
+#include "Sphere.h"

@@ -10,16 +10,19 @@ public:
 
 	void SetLookAtRotation(const Vector3& InTargetPosition);
 
+	bool ViewSpaceFrustumCulling(Sphere& sphere);
+	bool ClipSpaceFrustumCulling(const Vector2& ScreenSize, const Sphere& sphere);
+
 	//void SetCameraViewSize(const ScreenPoint& InScreenSize);
 
 	//Circle& GetCircleBound() { return _CircleBound; }
 	//Rectangle& GetRectBound() { return _RectBound; }
 
 private:
-	float nearZ = 0.3f;
-	float farZ = 1000.f;
+	float nearZ = 5.5f;
+	float farZ = 3000.f;
 	float Fov = 60.f;
-	float aspectRatio = 4 / 3;
+	float aspectRatio = 4.f / 3.f;
 	//Circle _CircleBound;
 	//Rectangle _RectBound;
 };

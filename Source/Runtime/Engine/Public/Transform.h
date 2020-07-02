@@ -54,6 +54,8 @@ public:
 
 	void Update();
 
+	Vector3 GetForward() const { return Forward; }
+
 private:
 	void CalculateLocalAxis();
 	void CalculateMatrices();
