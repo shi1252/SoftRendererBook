@@ -80,7 +80,7 @@ bool GameEngine::LoadScene()
 //#pragma endregion
 
 #pragma region 3D init
-	static float initScale = 100.f;
+	static float initScale = 0;
 	auto player = GameObject("Player", _Mesh["Cube"].get());
 	player.GetTransform().SetLocalScale(Vector3(initScale, initScale, initScale));
 	PushGameObject(&player);
@@ -102,6 +102,86 @@ bool GameEngine::LoadScene()
 	//	go.GetTransform().SetLocalPosition(Vector3(dist(mt), dist(mt), dist(mt)));
 	//	PushGameObject(&go);
 	//}
+
+	static const float baseScale = 100.f;
+	static const Vector3 bodyOffset(0.f, 0.75f, 0.f);
+	static const Vector3 headPivotOffset(0.f, 0.75f, 0.f);
+	static const Vector3 headOffset(0.f, 0.5f, 0.f);
+	static const Vector3 rHandPivotOffset(-0.75f, 0.75f, 0.f);
+	static const Vector3 lHandPivotOffset(0.75f, 0.75f, 0.f);
+	static const Vector3 rLegPivotOffset(-0.25f, -0.75f, 0.f);
+	static const Vector3 lLegPivotOffset(0.25f, -0.75f, 0.f);
+
+	auto Head = GameObject("Head", _Mesh["Head"].get());
+	Head.GetTransform().SetLocalScale(Vector3(baseScale, baseScale, baseScale));
+	PushGameObject(&Head);
+
+	auto Body = GameObject("Body", _Mesh["Body"].get());
+	Body.GetTransform().SetLocalScale(Vector3(baseScale, baseScale, baseScale));
+	PushGameObject(&Body);
+
+	auto LArm = GameObject("LArm", _Mesh["ArmLeg"].get());
+	LArm.GetTransform().SetLocalScale(Vector3(baseScale, baseScale, baseScale));
+	PushGameObject(&LArm);
+
+	auto RArm = GameObject("RArm", _Mesh["ArmLeg"].get());
+	RArm.GetTransform().SetLocalScale(Vector3(baseScale, baseScale, baseScale));
+	PushGameObject(&RArm);
+
+	auto LLeg = GameObject("LLeg", _Mesh["ArmLeg"].get());
+	LLeg.GetTransform().SetLocalScale(Vector3(baseScale, baseScale, baseScale));
+	PushGameObject(&LLeg);
+
+	auto RLeg = GameObject("RLeg", _Mesh["ArmLeg"].get());
+	RLeg.GetTransform().SetLocalScale(Vector3(baseScale, baseScale, baseScale));
+	PushGameObject(&RLeg);
+
+	//for (auto&& i : _Mesh["Head"].get()->GetVertices())
+	//	i += headOffset;
+
+	//for (auto&& i : _Mesh["Body"].get()->GetVertices())
+	//	i += headOffset;
+
+	//for (auto&& i : LArm.GetMesh()->_Vertices)
+	//	i += lHandOffset;
+
+	//for (auto&& i : _Mesh["RArm"].get()->GetVertices())
+	//	i += rHandOffset;
+
+	//for (auto&& i : _Mesh["LLeg"].get()->GetVertices())
+	//	i += lLegOffset;
+
+	//for (auto&& i : _Mesh["RLeg"].get()->GetVertices())
+	//	i += rLegOffset;
+
+	Transform* t = &FindGameObjectWithName("Head")->GetTransform();
+	t->SetParent(&FindGameObjectWithName("Body")->GetTransform());
+	t->SetLocalPosition(headPivotOffset + headOffset);
+
+	t = &FindGameObjectWithName("LArm")->GetTransform();
+	t->SetParent(&FindGameObjectWithName("Body")->GetTransform());
+	t->SetLocalPosition(lHandPivotOffset);
+
+	t = &FindGameObjectWithName("RArm")->GetTransform();
+	t->SetParent(&FindGameObjectWithName("Body")->GetTransform());
+	t->SetLocalPosition(rHandPivotOffset);
+
+	t = &FindGameObjectWithName("LLeg")->GetTransform();
+	t->SetParent(&FindGameObjectWithName("Body")->GetTransform());
+	t->SetLocalPosition(lLegPivotOffset);
+
+	t = &FindGameObjectWithName("RLeg")->GetTransform();
+	t->SetParent(&FindGameObjectWithName("Body")->GetTransform());
+	t->SetLocalPosition(rLegPivotOffset);
+
+	t = &FindGameObjectWithName("Body")->GetTransform();
+	t->SetLocalPosition(bodyOffset);
+
+	// Example
+	//headPivot->GetTransform().SetParent(&body->GetTransform());
+	//headPivot->GetTransform().SetLocalPosition(headPivotOffset);
+	//headPivot->GetTransform().SetScale(Vector3(1.f, 1.f, 1.f));
+
 #pragma endregion
 	return true;
 }
@@ -178,6 +258,76 @@ bool GameEngine::LoadResource()
 	};
 
 	_Mesh["Cube"].get()->CreateBound();
+#pragma endregion
+
+#pragma region Minecraft Character
+	static const Vector3 bodySize(0.5f, 0.75f, 0.25f);
+	static const Vector3 armlegSize(0.25f, 0.75f, 0.25f);
+
+	_Mesh["Head"] = std::make_unique<Mesh>();
+	_Mesh["Body"] = std::make_unique<Mesh>();
+	_Mesh["ArmLeg"] = std::make_unique<Mesh>();
+
+	_Mesh["Head"].get()->GetVertices() = {
+		// Right 
+		Vector3(-1.f, -1.f, -1.f) * cubeHalfSize, Vector3(-1.f, -1.f, 1.f) * cubeHalfSize, Vector3(-1.f, 1.f, 1.f) * cubeHalfSize, Vector3(-1.f, 1.f, -1.f) * cubeHalfSize,
+		// Front
+		Vector3(-1.f, -1.f, 1.f) * cubeHalfSize, Vector3(-1.f, 1.f, 1.f) * cubeHalfSize, Vector3(1.f, 1.f, 1.f) * cubeHalfSize, Vector3(1.f, -1.f, 1.f) * cubeHalfSize,
+		// Back
+		Vector3(-1.f, -1.f, -1.f) * cubeHalfSize, Vector3(-1.f, 1.f, -1.f) * cubeHalfSize, Vector3(1.f, 1.f, -1.f) * cubeHalfSize, Vector3(1.f, -1.f, -1.f) * cubeHalfSize,
+		// Left
+		Vector3(1.f, -1.f, -1.f) * cubeHalfSize, Vector3(1.f, -1.f, 1.f) * cubeHalfSize, Vector3(1.f, 1.f, 1.f) * cubeHalfSize, Vector3(1.f, 1.f, -1.f) * cubeHalfSize,
+		// Top
+		Vector3(-1.f, 1.f, -1.f) * cubeHalfSize, Vector3(1.f, 1.f, -1.f) * cubeHalfSize, Vector3(1.f, 1.f, 1.f) * cubeHalfSize, Vector3(-1.f, 1.f, 1.f) * cubeHalfSize,
+		// Bottom
+		Vector3(-1.f, -1.f, -1.f) * cubeHalfSize, Vector3(1.f, -1.f, -1.f) * cubeHalfSize, Vector3(1.f, -1.f, 1.f) * cubeHalfSize, Vector3(-1.f, -1.f, 1.f) * cubeHalfSize
+	};
+
+	_Mesh["Head"].get()->GetIndices() = {
+		0, 1, 2, 0, 2, 3, // Right
+		4, 6, 5, 4, 7, 6, // Front
+		8, 9, 10, 8, 10, 11, // Back
+		12, 14, 13, 12, 15, 14, // Left
+		16, 18, 17, 16, 19, 18, // Top
+		20, 21, 22, 20, 22, 23  // Bottom
+	};
+
+	_Mesh["Body"].get()->GetVertices() = {
+		// Right 
+		Vector3(-1.f, -1.f, -1.f) * bodySize, Vector3(-1.f, -1.f, 1.f) * bodySize, Vector3(-1.f, 1.f, 1.f) * bodySize, Vector3(-1.f, 1.f, -1.f) * bodySize,
+		// Front
+		Vector3(-1.f, -1.f, 1.f) * bodySize, Vector3(-1.f, 1.f, 1.f) * bodySize, Vector3(1.f, 1.f, 1.f) * bodySize, Vector3(1.f, -1.f, 1.f) * bodySize,
+		// Back
+		Vector3(-1.f, -1.f, -1.f) * bodySize, Vector3(-1.f, 1.f, -1.f) * bodySize, Vector3(1.f, 1.f, -1.f) * bodySize, Vector3(1.f, -1.f, -1.f) * bodySize,
+		// Left
+		Vector3(1.f, -1.f, -1.f) * bodySize, Vector3(1.f, -1.f, 1.f) * bodySize, Vector3(1.f, 1.f, 1.f) * bodySize, Vector3(1.f, 1.f, -1.f) * bodySize,
+		// Top
+		Vector3(-1.f, 1.f, -1.f) * bodySize, Vector3(1.f, 1.f, -1.f) * bodySize, Vector3(1.f, 1.f, 1.f) * bodySize, Vector3(-1.f, 1.f, 1.f) * bodySize,
+		// Bottom
+		Vector3(-1.f, -1.f, -1.f) * bodySize, Vector3(1.f, -1.f, -1.f) * bodySize, Vector3(1.f, -1.f, 1.f) * bodySize, Vector3(-1.f, -1.f, 1.f) * bodySize
+	};
+
+	_Mesh["Body"].get()->GetIndices() = _Mesh["Head"].get()->GetIndices();
+
+	_Mesh["ArmLeg"].get()->GetVertices() = {
+		// Right 
+		Vector3(-1.f, -1.f, -1.f) * armlegSize, Vector3(-1.f, -1.f, 1.f) * armlegSize, Vector3(-1.f, 1.f, 1.f) * armlegSize, Vector3(-1.f, 1.f, -1.f) * armlegSize,
+		// Front
+		Vector3(-1.f, -1.f, 1.f) * armlegSize, Vector3(-1.f, 1.f, 1.f) * armlegSize, Vector3(1.f, 1.f, 1.f) * armlegSize, Vector3(1.f, -1.f, 1.f) * armlegSize,
+		// Back
+		Vector3(-1.f, -1.f, -1.f) * armlegSize, Vector3(-1.f, 1.f, -1.f) * armlegSize, Vector3(1.f, 1.f, -1.f) * armlegSize, Vector3(1.f, -1.f, -1.f) * armlegSize,
+		// Left
+		Vector3(1.f, -1.f, -1.f) * armlegSize, Vector3(1.f, -1.f, 1.f) * armlegSize, Vector3(1.f, 1.f, 1.f) * armlegSize, Vector3(1.f, 1.f, -1.f) * armlegSize,
+		// Top
+		Vector3(-1.f, 1.f, -1.f) * armlegSize, Vector3(1.f, 1.f, -1.f) * armlegSize, Vector3(1.f, 1.f, 1.f) * armlegSize, Vector3(-1.f, 1.f, 1.f) * armlegSize,
+		// Bottom
+		Vector3(-1.f, -1.f, -1.f) * armlegSize, Vector3(1.f, -1.f, -1.f) * armlegSize, Vector3(1.f, -1.f, 1.f) * armlegSize, Vector3(-1.f, -1.f, 1.f) * armlegSize
+	};
+
+	_Mesh["ArmLeg"].get()->GetIndices() = _Mesh["Head"].get()->GetIndices();
+
+	for (auto&& i : _Mesh["ArmLeg"].get()->GetVertices())
+		i = Vector3(i.X, i.Y - armlegSize.Y, i.Z);
 #pragma endregion
 
 	return true;

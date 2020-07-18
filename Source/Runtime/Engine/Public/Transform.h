@@ -9,24 +9,26 @@ public:
 	void SetLocalPosition(const Vector3& InPosition);
 	void AddLocalPosition(const Vector3& InDeltaPosition);
 	void SetLocalScale(const Vector3& InScale);
-	void AddYawRotation(float yaw) { Rotation.Yaw += yaw; Rotation.Clamp(); Update(); }
-	void AddRollRotation(float roll) { Rotation.Roll  += roll; Rotation.Clamp(); Update(); }
-	void AddPitchRotation(float pitch) { Rotation.Pitch += pitch; Rotation.Clamp(); Update(); }
+	void AddYawRotation(float yaw);
+	void AddRollRotation(float roll);
+	void AddPitchRotation(float pitch);
 	void SetLocalRotation(Rotator InDegree);
+	void SetLocalRotation(Quaternion InQuaternion);
 	void AddLocalRotation(Rotator InDeltaDegree);
 	void SetWorldScale(const Vector3& InScale);
 	void SetWorldRotation(Rotator InDegree);
+	void SetWorldRotation(Quaternion InQuaternion);
 	void AddWorldRotation(Rotator InDeltaDegree);
 	void SetWorldPosition(const Vector3& InPosition);
 	void AddWorldPosition(const Vector3& InDeltaPosition);
 
 	Vector3 GetLocalPosition() const { return Position; }
 	Vector3 GetLocalScale() const { return Scale; }
-	Rotator GetLocalRotation() const { return Rotation; }
+	Quaternion GetLocalRotation() const { return Rotation; }
 
 	Vector3 GetWorldPosition() const { return WorldPosition; }
 	Vector3 GetWorldScale() const { return WorldScale; }
-	Rotator GetWorldRotation() const { return WorldRotation; }
+	Quaternion GetWorldRotation() const { return WorldRotation; }
 
 	Matrix4x4 GetModelingMatrix() const;
 	Matrix4x4 GetInvModelingMatrix() const;
@@ -61,7 +63,7 @@ private:
 	void CalculateMatrices();
 
 	Vector3 Position = Vector3::Zero;
-	Rotator Rotation = Rotator::Identity;
+	Quaternion Rotation = Quaternion::Identity;
 	Vector3 Scale = Vector3::One;
 
 	Vector3 Right = Vector3::UnitX;
@@ -69,7 +71,7 @@ private:
 	Vector3 Forward = Vector3::UnitZ;
 
 	Vector3 WorldPosition = Vector3::Zero;
-	Rotator WorldRotation = Rotator::Identity;
+	Quaternion WorldRotation = Quaternion::Identity;
 	Vector3 WorldScale = Vector3::One;
 
 	Matrix4x4 _LocalTRS;

@@ -37,10 +37,12 @@ void Camera::SetLookAtRotation(const Vector3& InTargetPosition)
 	}
 	_Transform.Up = _Transform.Forward.Cross(_Transform.Right).Normalize();
 
-	_Transform.Rotation.Pitch = Math::Rad2Deg(asinf(-_Transform.Forward.Y));
-	float cp = cosf(Math::Deg2Rad(_Transform.Rotation.Pitch));
-	_Transform.Rotation.Roll = Math::Rad2Deg(asinf(_Transform.Right.Y / cp));
-	_Transform.Rotation.Yaw = Math::Rad2Deg(acosf(_Transform.Forward.Z / cp));
+	Rotator Rotation;
+	Rotation.Pitch = Math::Rad2Deg(asinf(-_Transform.Forward.Y));
+	float cp = cosf(Math::Deg2Rad(Rotation.Pitch));
+	Rotation.Roll = Math::Rad2Deg(asinf(_Transform.Right.Y / cp));
+	Rotation.Yaw = Math::Rad2Deg(acosf(_Transform.Forward.Z / cp));
+	_Transform.SetWorldRotation(Rotation);
 }
 
 bool Camera::ViewSpaceFrustumCulling(Sphere& sphere)

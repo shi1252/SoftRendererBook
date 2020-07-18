@@ -2,6 +2,7 @@
 
 #include <intrin.h>
 #include <math.h>
+#include <float.h>
 #include "Platform.h"
 
 struct Math
@@ -123,6 +124,11 @@ struct Math
 		}
 
 		return (X - intPortion);
+	}
+
+	static FORCEINLINE bool NearlyEqual(float value)
+	{
+		return fabsf(value) < FLT_EPSILON;
 	}
 };
 

@@ -15,6 +15,7 @@ public:
 	FORCEINLINE float& operator[](BYTE InIndex);
 	FORCEINLINE Vector3 operator-() const;
 	FORCEINLINE Vector3 operator*(float InScale) const;
+	FORCEINLINE Vector3 operator*(Vector3 InScale) const;
 	FORCEINLINE Vector3 operator/(float InScale) const;
 	FORCEINLINE Vector3 operator+(const Vector3& InVector) const;
 	FORCEINLINE Vector3 operator-(const Vector3& InVector) const;
@@ -102,6 +103,11 @@ FORCEINLINE Vector3 Vector3::operator-() const
 FORCEINLINE Vector3 Vector3::operator*(float InScale) const
 {
 	return Vector3(X * InScale, Y * InScale, Z * InScale);
+}
+
+FORCEINLINE Vector3 Vector3::operator*(Vector3 InScale) const
+{
+	return Vector3(X * InScale.X, Y * InScale.Y, Z * InScale.Z);
 }
 
 FORCEINLINE Vector3 Vector3::operator/(float InScale) const

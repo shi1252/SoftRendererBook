@@ -37,6 +37,9 @@ void SoftRenderer::DrawGizmo3D()
 }
 
 float rad = 0.f;
+float t = 0.f;
+float t2 = 1.f;
+bool straight = true;
 // 게임 로직
 void SoftRenderer::Update3D(float InDeltaSeconds)
 {
@@ -57,6 +60,42 @@ void SoftRenderer::Update3D(float InDeltaSeconds)
 		_ClipFrustumCull = true;
 
 	rad += Math::Deg2Rad(30.f * InDeltaSeconds);
+
+	Rotator ri = Rotator(30, 20, 90.f);
+	Quaternion q(ri);
+	Rotator r = q.ToRotator();
+
+	Quaternion q1(Rotator(0, 0, -45));
+	Quaternion q2(Rotator(0, 0, 45));
+	Quaternion q3(Rotator(-5, 0, -5));
+	Quaternion q4(Rotator(5, 0, 5));
+	if (straight)
+	{
+		t += InDeltaSeconds ;
+		t2 -= InDeltaSeconds ;
+		if (t >= 1.f)
+			straight = false;
+	}
+	else
+	{
+		t -= InDeltaSeconds ;
+		t2 += InDeltaSeconds ;
+		if (t <= 0.f)
+			straight = true;
+	}
+
+	Transform& la = _GameEngine.FindGameObjectWithName("LArm")->GetTransform();
+	Transform& ra = _GameEngine.FindGameObjectWithName("RArm")->GetTransform();
+	Transform& ll = _GameEngine.FindGameObjectWithName("LLeg")->GetTransform();
+	Transform& rl = _GameEngine.FindGameObjectWithName("RLeg")->GetTransform();
+	Transform& h = _GameEngine.FindGameObjectWithName("Head")->GetTransform();
+	Transform& b = _GameEngine.FindGameObjectWithName("Body")->GetTransform();
+	la.SetWorldRotation(Quaternion::Slerp(q1, q2, t).ToRotator());
+	ra.SetWorldRotation(Quaternion::Slerp(q1, q2, t2).ToRotator());
+	ll.SetWorldRotation(Quaternion::Slerp(q1, q2, t2).ToRotator());
+	rl.SetWorldRotation(Quaternion::Slerp(q1, q2, t).ToRotator());
+	h.SetWorldRotation(Quaternion::Slerp(q3, q4, t).ToRotator());
+	b.SetWorldRotation(Quaternion::Slerp(q3, q4, t2).ToRotator());
 }
 
 void SoftRenderer::Render3D()
@@ -128,14 +167,14 @@ void SoftRenderer::Render3D()
 		Matrix4x4 finalMat = viewProjMat * go->GetTransform().GetWorldModelingMatrix();
 
 #pragma region Rodrigues rotation
-		Vector4 n(1.f, 3.f, 1.f, 0.f);
-		n = n.Normalize();
-		float cs = cosf(rad);
-		for (int i = 0; i < vertexCount; ++i)
-		{
-			vertices[i] = vertices[i] * cs + n * (1 - cs) * vertices[i].Dot(n) + Vector4(Vector3(n).Cross(vertices[i]) * sinf(rad), 0);
-			vertices[i].W = 1.f;
-		}
+		//Vector4 n(1.f, 3.f, 1.f, 0.f);
+		//n = n.Normalize();
+		//float cs = cosf(rad);
+		//for (int i = 0; i < vertexCount; ++i)
+		//{
+		//	vertices[i] = vertices[i] * cs + n * (1 - cs) * vertices[i].Dot(n) + Vector4(Vector3(n).Cross(vertices[i]) * sinf(rad), 0);
+		//	vertices[i].W = 1.f;
+		//}
 #pragma endregion
 
 		// 정점에 행렬을 적용

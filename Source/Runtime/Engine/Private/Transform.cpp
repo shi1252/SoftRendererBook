@@ -5,11 +5,7 @@ Matrix4x4 Transform::GetModelingMatrix() const
 {
 	Matrix4x4 translateMat(Vector4::UnitX, Vector4::UnitY, Vector4::UnitZ, Vector4(Position));
 
-	Matrix4x4 rotationMat(
-		Vector4(Right, false),
-		Vector4(Up, false),
-		Vector4(Forward, false),
-		Vector4::UnitW);
+	Matrix4x4 rotationMat = Rotation.ToRotationMatrix();
 
 	Matrix4x4 scaleMat(Vector4::UnitX * Scale.X, Vector4::UnitY * Scale.Y, Vector4::UnitZ * Scale.Z, Vector4::UnitW);
 	return translateMat * rotationMat * scaleMat;
@@ -19,18 +15,7 @@ Matrix4x4 Transform::GetInvModelingMatrix() const
 {
 	Matrix4x4 translateMat(Vector4::UnitX, Vector4::UnitY, Vector4::UnitZ, Vector4(-Position));
 
-	float sin, cos;
-	Math::GetSinCos(sin, cos, WorldRotation.Yaw);
-
-	Vector3 WorldRight = Vector3::UnitX;//Vector3(cos, sin);
-	Vector3 WorldUp = Vector3::UnitY;//Vector3(-sin, cos);
-	Vector3 WorldForward = Vector3::UnitZ;
-
-	Matrix4x4 rotationMat(
-		Vector4(WorldRight, false),
-		Vector4(WorldUp, false),
-		Vector4(WorldForward, false),
-		Vector4::UnitZ);
+	Matrix4x4 rotationMat = WorldRotation.ToRotationMatrix();
 	rotationMat = rotationMat.Tranpose();
 
 	Matrix4x4 scaleMat(Vector4::UnitX * (1.f / WorldScale.X), Vector4::UnitY * (1.f / WorldScale.Y), Vector4::UnitZ * (1.f / WorldScale.Z), Vector4::UnitW);
@@ -46,11 +31,7 @@ Matrix4x4 Transform::GetInvWorldModelingMatrix() const
 {
 	Matrix4x4 translateMat(Vector4::UnitX, Vector4::UnitY, Vector4::UnitZ, Vector4(-WorldPosition));
 
-	Matrix4x4 rotationMat(
-		Vector4(Right, false),
-		Vector4(Up, false),
-		Vector4(Forward, false),
-		Vector4::UnitZ);
+	Matrix4x4 rotationMat = Rotation.ToRotationMatrix();
 	rotationMat = rotationMat.Tranpose();
 
 	Matrix4x4 scaleMat(Vector4::UnitX * (1.f / Scale.X), Vector4::UnitY * (1.f / Scale.Y), Vector4::UnitZ * (1.f / Scale.Z), Vector4::UnitW);
@@ -87,7 +68,7 @@ bool Transform::SetParent(Transform* InTransformPtr)
 
 	Vector3 invScale = Vector3(1.f / _ParentPtr->WorldScale.X, 1.f / _ParentPtr->WorldScale.Y, 1.f / _ParentPtr->WorldScale.Z);
 	Scale = Vector3(Scale.X * invScale.X, Scale.Y * invScale.Y, Scale.Z * invScale.Z);
-	Rotation -= _ParentPtr->WorldRotation;
+	Rotation *= _ParentPtr->WorldRotation.Inverse();
 
 	Position = _ParentPtr->GetInvWorldModelingMatrix() * Position;
 	Update();
@@ -108,14 +89,9 @@ void Transform::Update()
 
 void Transform::CalculateLocalAxis()
 {
-	float cy, sy, cp, sp, cr, sr;
-	Math::GetSinCos(sy, cy, Rotation.Yaw);
-	Math::GetSinCos(sp, cp, Rotation.Pitch);
-	Math::GetSinCos(sr, cr, Rotation.Roll);
-
-	Right = Vector3(cy * cr + sy * sp * sr, cp * sr, -sy * cr + cy * sp * sr);
-	Up = Vector3(-cy * sr + sy * sp * cr, cp * cr, sy * sr + cy * sp * cr);
-	Forward = Vector3(sy * cp, -sp, cy * cp);
+	Right = Rotation.RotateVector(Vector3(1, 0, 0));
+	Up = Rotation.RotateVector(Vector3(0, 1, 0));
+	Forward = Rotation.RotateVector(Vector3(0, 0, 1));
 }
 
 void Transform::CalculateMatrices()
@@ -156,15 +132,39 @@ void Transform::SetLocalScale(const Vector3& InScale)
 	Update();
 }
 
+void Transform::AddYawRotation(float yaw)
+{
+	Rotation *= Quaternion(Rotator(yaw, 0, 0));
+	Update();
+}
+
+void Transform::AddRollRotation(float roll)
+{
+	Rotation *= Quaternion(Rotator(0, roll, 0));
+	Update();
+}
+
+void Transform::AddPitchRotation(float pitch)
+{
+	Rotation *= Quaternion(Rotator(0, 0, pitch));
+	Update();
+}
+
 void Transform::SetLocalRotation(Rotator InDegree)
 {
-	Rotation = InDegree;
+	Rotation = Quaternion(InDegree);
+	Update();
+}
+
+void Transform::SetLocalRotation(Quaternion InQuaternion)
+{
+	Rotation = InQuaternion;
 	Update();
 }
 
 void Transform::AddLocalRotation(Rotator InDeltaDegree)
 {
-	Rotation += InDeltaDegree;
+	Rotation *= Quaternion(InDeltaDegree);
 	Update();
 }
 
@@ -185,28 +185,42 @@ void Transform::SetWorldScale(const Vector3& InScale)
 
 void Transform::SetWorldRotation(Rotator InDegree)
 {
-	WorldRotation = InDegree;
+	WorldRotation = Quaternion(InDegree);
 	if (_ParentPtr == nullptr)
 	{
 		Rotation = WorldRotation;
 	}
 	else
 	{
-		Rotation = WorldRotation - _ParentPtr->WorldRotation;
+		Rotation = WorldRotation * _ParentPtr->WorldRotation.Inverse();
+	}
+	Update();
+}
+
+void Transform::SetWorldRotation(Quaternion InQuaternion)
+{
+	WorldRotation = InQuaternion;
+	if (_ParentPtr == nullptr)
+	{
+		Rotation = WorldRotation;
+	}
+	else
+	{
+		Rotation = WorldRotation * _ParentPtr->WorldRotation.Inverse();
 	}
 	Update();
 }
 
 void Transform::AddWorldRotation(Rotator InDeltaDegree)
 {
-	WorldRotation += InDeltaDegree;
+	WorldRotation *= Quaternion(InDeltaDegree);
 	if (_ParentPtr == nullptr)
 	{
 		Rotation = WorldRotation;
 	}
 	else
 	{
-		Rotation = WorldRotation - _ParentPtr->WorldRotation;
+		Rotation = WorldRotation * _ParentPtr->WorldRotation.Inverse();
 	}
 	Update();
 }
