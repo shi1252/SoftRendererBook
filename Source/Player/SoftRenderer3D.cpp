@@ -90,12 +90,12 @@ void SoftRenderer::Update3D(float InDeltaSeconds)
 	Transform& rl = _GameEngine.FindGameObjectWithName("RLeg")->GetTransform();
 	Transform& h = _GameEngine.FindGameObjectWithName("Head")->GetTransform();
 	Transform& b = _GameEngine.FindGameObjectWithName("Body")->GetTransform();
-	la.SetWorldRotation(Quaternion::Slerp(q1, q2, t).ToRotator());
-	ra.SetWorldRotation(Quaternion::Slerp(q1, q2, t2).ToRotator());
-	ll.SetWorldRotation(Quaternion::Slerp(q1, q2, t2).ToRotator());
-	rl.SetWorldRotation(Quaternion::Slerp(q1, q2, t).ToRotator());
-	h.SetWorldRotation(Quaternion::Slerp(q3, q4, t).ToRotator());
-	b.SetWorldRotation(Quaternion::Slerp(q3, q4, t2).ToRotator());
+	la.SetWorldRotation(Quaternion::Slerp(q1, q2, t));
+	ra.SetWorldRotation(Quaternion::Slerp(q1, q2, t2));
+	ll.SetWorldRotation(Quaternion::Slerp(q1, q2, t2));
+	rl.SetWorldRotation(Quaternion::Slerp(q1, q2, t));
+	h.SetWorldRotation(Quaternion::Slerp(q3, q4, t));
+	b.SetWorldRotation(Quaternion::Slerp(q3, q4, t2));
 }
 
 void SoftRenderer::Render3D()
